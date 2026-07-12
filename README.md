@@ -42,6 +42,7 @@ The core UI engine functions sequentially through these module blocks:
 
 
 👥Team
+
 Developed for the BAIUST CSE Spring Fest 2026 Hackathon – Junior Segment.By Abir,Shafayet,saif and Rakin
 
 This project was created solely for educational and hackathon purposes.
