@@ -39,6 +39,8 @@ The core UI engine functions sequentially through these module blocks:
 2. **📢 M1: The Anonymous Whistleblower:** A secure interface for submitting strikes and monitoring threat levels with a progressive structural warning bar.
 3. **🪑 M2: Height Sorted Classroom Grid UI:** An automated workspace sorting student seating arrangements in a grid structure based on height indices.
 4. **📚 M3 to M6 Modules:** Features the Syllabus Prompt Negotiator, Corrupt Economy Ledger Dashboard (Data Charting), Local SOS Backup Trigger, and the compliance Rulebook Fact-Checker.
+
+
 👥Team
 Developed for the BAIUST CSE Spring Fest 2026 Hackathon – Junior Segment.By Saif,Abir,Shafayet and Rakin
 
