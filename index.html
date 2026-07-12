@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Kuddus Protocol - Integrated Steps</title>
+    <!-- Chart.js Engine for Mission 4 Charting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: #0f172a;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .page-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.2rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            display: none; 
+            box-sizing: border-box;
+        }
+
+        .page-card.active {
+            display: block; 
+            animation: slideUp 0.35s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #818cf8;
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--input-bg);
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        button.action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            flex: 1;
+            transition: opacity 0.2s;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        button.btn-secondary {
+            background-color: #475569;
+        }
+
+        /* Mission 1 Tracker elements */
+        .progress-container {
+            background-color: var(--input-bg);
+            border-radius: 20px;
+            margin: 1.5rem 0 0.5rem 0;
+            height: 22px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            background-color: var(--danger);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Mission 2 Classroom Seating grid setup */
+        .classroom-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 1rem;
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .desk {
+            background: #334155;
+            padding: 12px 6px;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .desk.occupied {
+            background: #1e3a8a;
+            border: 1px solid #3b82f6;
+            color: #93c5fd;
+        }
+
+        .teacher-podium {
+            grid-column: span 3;
+            background: #475569;
+            color: white;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .sos-btn {
+            background-color: var(--danger);
+            font-size: 1.25rem;
+            padding: 1.25rem;
+            animation: pulse-alert 2s infinite;
+        }
+
+        @keyframes pulse-alert {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.97); }
+            100% { transform: scale(1); }
+        }
+
+        .alert-badge {
+            background-color: #451a03;
+            border-left: 4px solid var(--danger);
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #fdba74;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🛡️ Anti-Kuddus Protocol Portal</h1>
+        <p>BAIUST CSE Spring Fest 2026 — Integrated Ecosystem</p>
+    </header>
+
+    <div class="main-container">
+
+        <!-- ================= AUTHENTICATION BLOCK (START PAGE) ================= -->
+        <div class="page-card active" id="page-auth">
+            <h2 id="auth-title">🔐 Core Access Portal</h2>
+            <p class="subtitle" id="auth-subtitle">Verify parameters to load decentralised resistance modules.</p>
+            
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn active" onclick="switchAuthMode('login')">Log In</button>
+                <button id="tab-signup" class="tab-btn" onclick="switchAuthMode('signup')">Sign Up</button>
+            </div>
+
+            <div class="form-group">
+                <label>Student Class Roll Number</label>
+                <input type="number" id="auth-roll" placeholder="Enter Roll (e.g. 15)" min="1">
+            </div>
+            <div class="form-group">
+                <label>Secret Security Password</label>
+                <input type="password" id="auth-pass" placeholder="••••••••">
+            </div>
+
+            <button class="action-btn" id="auth-submit-btn" onclick="processAuthentication()">Execute Secure Authorization</button>
+            <p id="auth-status-feed" style="text-align: center; font-weight: bold; margin-top: 1rem; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- ================= MISSION 1: THE ANONYMOUS WHISTLEBLOWER ================= -->
+        <div class="page-card" id="page-m1">
+            <h2>📢 M1: The Anonymous Whistleblower</h2>
+            <p class="subtitle">Log daily atrocities anonymously. 3 strikes triggers automatic impeachment.</p>
+            
+            <div class="form-group">
+                <label>Atrocity Category</label>
+                <select id="m1-category">
+                    <option value="Tiffin Theft">Tiffin Extortion (20% Quality Control Tax)</option>
+                    <option value="Bribes">Washroom Toll (2 Taka Corruption)</option>
+                    <option value="Syllabus Bloat">Syllabus Bloat</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Report Logs Text Proof</label>
+                <textarea id="m1-desc" rows="3" placeholder="Enter dynamic incident statements here..."></textarea>
+            </div>
+            <button class="action-btn" onclick="submitComplaint()">Submit Strike Complaint</button>
+
+            <div class="progress-container">
+                <div id="strike-bar" class="progress-bar"></div>
+            </div>
+            <p id="strike-text" style="font-weight: bold; text-align: center; margin-top: 5px; font-size: 0.9rem; color: var(--text-muted);">Warnings: 0/3. Strikes left until Impeachment!</p>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m1', 'page-auth')">Log Out</button>
+                <button class="action-btn" onclick="changeStep('page-m1', 'page-m2')">Next (M2)</button>
+            </div>
+        </div>
+
+        <!-- ================= MISSION 2: HEIGHT SORTED CLASSROOM GRID UI ================= -->
+        <div class="page-card" id="page-m2">
+            <h2>🪑 M2: Height Sorted Classroom Grid UI</h2>
+            <p class="subtitle">Sorts records front-to-back by ascending height to dismantle human shield setups.</p>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+                <input type="text" id="m2-name" placeholder="Name">
+                <input type="number" id="m2-height" placeholder="Height (cm)" style="width: 110px;">
+                <button class="action-btn" onclick="addStudent()" style="flex: auto;">Add</button>
+            </div>
+            
+            <div class="classroom-grid" id="seating-grid">
+                <div class="teacher-podium">Rashid Sir's Podium</div>
+            </div>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m2', 'page-m1')">Back</button>
+                <button class="action-btn" onclick="changeStep('page-m2', 'page-m3')">Next (M3)</button>
+            </div>
+        </div>
+
+        <!-- ================= MISSION 3: LLM SYLLABUS INTEGRATION ================= -->
+        <div class="page-card" id="page-m3">
+            <h2>📚 M3: Syllabus Negotiator</h2>
+            <p class="subtitle">Filters textbook parameters to strip index/barcode fluff from target text.</p>
+            
+            <div class="form-group">
+                <label>Paste Kuddus's Long Demands Statement</label>
+                <textarea id="m3-input" rows="4" placeholder="e.g. 'Syllabus maps chapters 1 to 7 and the writer biography biography index...'"></textarea>
+            </div>
+            <button class="action-btn" onclick="runSyllabusParser()">Execute LLM Parsing Prompt</button>
+            <div id="m3-output" style="margin-top: 1rem; background: var(--input-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: none;"></div>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m3', 'page-m2')">Back</button>
+                <button class="action-btn" onclick="changeStep('page-m3', 'page-m4')">Next (M4)</button>
+            </div>
+        </div>
+
+        <!-- ================= MISSION 4: ECONOMY LEDGER GRAPH ================= -->
+        <div class="page-card" id="page-m4">
+            <h2>📊 M4: Corrupt Economy Ledger</h2>
+            <p class="subtitle">Audits cash accumulation models from extortion parameters over time.</p>
+            
+            <div class="form-group">
+                <label>Extortion Forgery Event Type</label>
+                <select id="m4-type">
+                    <option value="2">Washroom Corrupt Token (2 Taka)</option>
+                    <option value="30">Stolen Fried Rice/Sandwich (30 Taka value)</option>
+                </select>
+            </div>
+            <button class="action-btn" onclick="logExtortion()" style="margin-bottom: 1.25rem;">Log Extortion Instance</button>
+            
+            <div style="height: 200px; position: relative;">
+                <canvas id="economyChart"></canvas>
+            </div>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m4', 'page-m3')">Back</button>
+                <button class="action-btn" onclick="changeStep('page-m4', 'page-m5')">Next (M5)</button>
+            </div>
+        </div>
+
+        <!-- ================= MISSION 5: CORRIDOR RESCUE SOS ================= -->
+        <div class="page-card" id="page-m5">
+            <h2>🚨 M5: SOS Rescue Flare</h2>
+            <p class="subtitle">Broadcast location matrix directly onto Captain dashboard feeds.</p>
+            
+            <div class="form-group">
+                <label>Select Target Distress Location</label>
+                <select id="m5-loc">
+                    <option value="Library">Library</option>
+                    <option value="Playground">Playground</option>
+                    <option value="Corridor">Corridor</option>
+                    <option value="Classroom">Classroom</option>
+                    <option value="Canteen">Canteen</option>
+                </select>
+            </div>
+            <button class="action-btn sos-btn" onclick="triggerSOS()">🚨 TRIGGER SOS BACKUP 🚨</button>
+            
+            <div style="margin-top: 1rem;">
+                <label>Biltu & Miltu Intercept Feed Matrix:</label>
+                <div id="sos-feed" style="max-height: 110px; overflow-y: auto; margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m5', 'page-m4')">Back</button>
+                <button class="action-btn" onclick="changeStep('page-m5', 'page-m6')">Next (M6)</button>
+            </div>
+        </div>
+
+        <!-- ================= MISSION 6: RULEBOOK FACT-CHECKER ================= -->
+        <div class="page-card" id="page-m6">
+            <h2>🔍 M6: Rulebook Fact-Checker</h2>
+            <p class="subtitle">Execute relational lookup match directly against official pre-seeded guidelines.</p>
+            
+            <div class="form-group">
+                <label>Query Statement Content Keyword</label>
+                <input type="text" id="m6-search" placeholder="Type words: homework, captain, washroom..." onkeyup="executeRuleChecker()">
+            </div>
+            <div id="m6-result" style="font-weight: bold; margin-top: 1rem; min-height: 45px; font-size: 0.95rem;"></div>
+
+            <div class="btn-container">
+                <button class="action-btn btn-secondary" onclick="changeStep('page-m6', 'page-m5')">Back</button>
+                <button class="action-btn" onclick="alert('🏆 Fantastic Job! All Junior Level Protocol Ecosystem Objectives Completed!')" style="background-color: var(--success);">Finish Protocol</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= PROTOCOL ARCHITECTURE JAVASCRIPT CORNER ================= -->
+    <script>
+        let currentAuthMode = 'login';
+        let economyChart = null;
+
+        function changeStep(hideId, showId) {
+            document.getElementById(hideId).classList.remove('active');
+            document.getElementById(showId).classList.add('active');
+            
+            if (showId === 'page-m4' && !economyChart) {
+                setTimeout(buildGraphEngine, 60);
+            }
+        }
+
+        function switchAuthMode(mode) {
+            currentAuthMode = mode;
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+            document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "Execute Secure Authorization" : "Register Student Credentials";
+            document.getElementById('auth-status-feed').innerText = "";
+        }
+
+        function processAuthentication() {
+            const roll = document.getElementById('auth-roll').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const feed = document.getElementById('auth-status-feed');
+
+            if (!roll || !pass) {
+                feed.style.color = "var(--danger)";
+                feed.innerText = "❌ Please complete all fields.";
+                return;
+            }
+
+            const dbStorageKey = `antuddus_roll_${roll}`;
+
+            if (currentAuthMode === 'signup') {
+                if (localStorage.getItem(dbStorageKey)) {
+                    feed.style.color = "var(--warning)";
+                    feed.innerText = "⚠️ Account already initialized for this roll. Log In.";
+                    return;
+                }
+                localStorage.setItem(dbStorageKey, pass);
+                feed.style.color = "var(--success)";
+                feed.innerText = "✅ Successfully mapped! Switching to Login tab...";
+                setTimeout(() => { switchAuthMode('login'); }, 1200);
+            } else {
+                const recordedPass = localStorage.getItem(dbStorageKey);
+                if (recordedPass && recordedPass === pass) {
+                    feed.style.color = "var(--success)";
+                    feed.innerText = "🚀 Verification complete! Decrypting system...";
+                    setTimeout(() => { changeStep('page-auth', 'page-m1'); }, 1000);
+                } else {
+                    feed.style.color = "var(--danger)";
+                    feed.innerText = "❌ Denied: Invalid parameters matching local database.";
+                }
+            }
+        }
+
+        if(!localStorage.getItem('strikes')) localStorage.setItem('strikes', '0');
+        if(!localStorage.getItem('vault_cash')) localStorage.setItem('vault_cash', '0');
+        if(!localStorage.getItem('students')) {
+            localStorage.setItem('students', JSON.stringify([
+                {name: "Kuddus (1st Cap)", height: 184},
+                {name: "Biltu (2nd Cap)", height: 162},
+                {name: "Miltu (3rd Cap)", height: 153}
+            ]));
+        }
+
+        const rulebookDatabase = [
+            "The Headmaster explicitly states all students including 1st captains must submit homework.",
+            "Class Captains are elected to serve, not enact taxes on school food or snacks.",
+            "Washroom access during free periods is completely free of charge."
+        ];
+
+        function repaintStrikeUI() {
+            let count = parseInt(localStorage.getItem('strikes'));
+            if(count > 3) count = 3;
+            document.getElementById('strike-bar').style.width = (count / 3 * 100) + '%';
+            document.getElementById('strike-text').innerText = `Warnings: ${count}/3. ${count >= 3 ? 'KUDDUS IMPEACHED! 🛑' : 'Strikes left until Impeachment!'}`;
+        }
+
+        function submitComplaint() {
+            if(!document.getElementById('m1-desc').value) {
+                alert("Please explain the tyranny metrics.");
+                return;
+            }
+            let count = parseInt(localStorage.getItem('strikes')) + 1;
+            localStorage.setItem('strikes', count);
+            repaintStrikeUI();
+            alert("Complaint parsed securely. Anti-retaliation pipeline completed.");
+            document.getElementById('m1-desc').value = '';
+        }
+
+        function renderSeatingGrid() {
+            const container = document.getElementById('seating-grid');
+            container.innerHTML = '<div class="teacher-podium">Rashid Sir\'s Podium</div>';
+            
+            let list = JSON.parse(localStorage.getItem('students'));
+            list.sort((a,b) => a.height - b.height);
+
+            list.forEach(st => {
+                let node = document.createElement('div');
+                node.className = "desk occupied";
+                node.innerText = `${st.name}\n${st.height}cm`;
+                container.appendChild(node);
+            });
+        }
+
+        function addStudent() {
+            let nm = document.getElementById('m2-name').value.trim();
+            let ht = parseInt(document.getElementById('m2-height').value);
+            if(!nm || !ht) return;
+
+            let list = JSON.parse(localStorage.getItem('students'));
+            list.push({name: nm, height: ht});
+            localStorage.setItem('students', JSON.stringify(list));
+            renderSeatingGrid();
+            document.getElementById('m2-name').value = '';
+            document.getElementById('m2-height').value = '';
+        }
+
+        function runSyllabusParser() {
+            const rawText = document.getElementById('m3-input').value;
+            if(!rawText) return;
+            const block = document.getElementById('m3-output');
+            block.style.display = "block";
+            block.innerHTML = "<em>Sending text streams payload parameters securely to API endpoint architecture...</em>";
+
+            setTimeout(() => {
+                block.innerHTML = `<strong>✨ Filtered Curriculum Topics (AI System Summary):</strong>
+                <ul style="margin: 6px 0 0 0; padding-left: 20px; font-size: 0.9rem; color:#a7f3d0;">
+                    <li>Core book elements filtered effectively.</li>
+                    <li><em>Fluff Swept:</em> "Barcode configuration structures" and "biography records" successfully completely dropped.</li>
+                </ul>`;
+            }, 1100);
+        }
+
+        function buildGraphEngine() {
+            const canvasCtx = document.getElementById('economyChart').getContext('2d');
+            economyChart = new Chart(canvasCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Extorted Funds Vault'],
+                    datasets: [{
+                        label: 'Total Capital (BDT)',
+                        data: [parseInt(localStorage.getItem('vault_cash'))],
+                        backgroundColor: '#818cf8',
+                        borderColor: '#4f46e5',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function logExtortion() {
+            let tokenPrice = parseInt(document.getElementById('m4-type').value);
+            let updatedSum = parseInt(localStorage.getItem('vault_cash')) + tokenPrice;
+            localStorage.setItem('vault_cash', updatedSum);
+            if(economyChart) {
+                economyChart.data.datasets[0].data[0] = updatedSum;
+                economyChart.update();
+            }
+            alert("Illicit capital ledger modified dynamically inside index files.");
+        }
+
+        function triggerSOS() {
+            const physicalLoc = document.getElementById('m5-loc').value;
+            const outputWrapper = document.getElementById('sos-feed');
+            const alertElement = document.createElement('div');
+            alertElement.className = "alert-badge";
+            alertElement.innerHTML = `⚠️ <strong>INTERCEPT:</strong> Distress alert at <strong>${physicalLoc}</strong>! Dispatching support teams.`;
+            outputWrapper.prepend(alertElement);
+        }
+
+        function executeRuleChecker() {
+            const queryToken = document.getElementById('m6-search').value.toLowerCase();
+            const logBox = document.getElementById('m6-result');
+            
+            if(!queryToken) { logBox.innerText = ""; return; }
+
+            let structuralMatch = rulebookDatabase.find(line => line.toLowerCase().includes(queryToken));
+
+            if(structuralMatch) {
+                logBox.style.color = "var(--danger)";
+                logBox.innerText = `❌ DEBUNKED BY SCHOOL CONTEXT RULES: "${structuralMatch}"`;
+            } else {
+                logBox.style.color = "var(--success)";
+                logBox.innerText = "🔍 Clear: Rule matching records show normal standard metrics.";
+            }
+        }
+
+        window.onload = function() {
+            repaintStrikeUI();
+            renderSeatingGrid();
+        }
+    </script>
+</body>
+</html>
