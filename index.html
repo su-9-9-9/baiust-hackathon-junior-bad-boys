@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Lazy - Integrated Control Hub</title>
+    <!-- Chart.js Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark-red: #0a0101;
+            --card-red-black: #140404;
+            --sidebar-color: #070101;
+            --border-glow: #ef4444;
+            --primary-blue: #3b82f6;
+            --admin-pink: #ec4899;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sky-blue: #38bdf8; /* Sky Blue Color Token */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-dark-red);
+            color: var(--text-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* 🌌 FIRST PANEL: REAL SKY BLUE LIVE STARRY THEME */
+        #portal-gateway {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0c4a6e 0%, #0284c7 40%, #0369a1 70%, #0f172a 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10000; transition: opacity 0.4s ease;
+            overflow: hidden;
+            box-shadow: inset 0 0 100px rgba(56, 189, 248, 0.3);
+        }
+        
+        /* Live Sky Twinkling Stars */
+        .sky-star {
+            position: absolute; width: 2.5px; height: 2.5px; background: #ffffff;
+            border-radius: 50%; opacity: 0.4; animation: pulseStar 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseStar {
+            0%, 100% { transform: scale(1); opacity: 0.3; box-shadow: 0 0 2px #ffffff; }
+            50% { transform: scale(2.8); opacity: 1; box-shadow: 0 0 10px #ffffff, 0 0 20px var(--sky-blue); }
+        }
+
+        .gateway-title { 
+            font-size: 4.5rem; font-weight: 900; 
+            color: var(--sky-blue); margin-bottom: 0.2rem;
+            text-shadow: 0 0 35px rgba(56, 189, 248, 0.7), 0 0 5px #ffffff;
+            letter-spacing: 3px; z-index: 5;
+        }
+        .gateway-sub { 
+            color: var(--sky-blue); margin-bottom: 3rem; font-size: 1.6rem; font-weight: 700; 
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.5); z-index: 5; letter-spacing: 1px;
+        }
+        .gateway-btn-group { display: flex; gap: 2rem; z-index: 5;}
+        .g-btn { 
+            padding: 1.2rem 3rem; font-size: 1.2rem; font-weight: bold; 
+            border: 2px solid transparent; border-radius: 50px; cursor: pointer; 
+            color: white; transition: all 0.3s;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+        }
+        .g-student { background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid rgba(255,255,255,0.2); }
+        .g-student:hover { box-shadow: 0 0 35px rgba(56, 189, 248, 0.8); transform: translateY(-3px); }
+        .g-admin { background: linear-gradient(135deg, #db2777, #be185d); border: 1px solid rgba(255,255,255,0.1); }
+        .g-admin:hover { box-shadow: 0 0 30px rgba(236, 72, 153, 0.6); transform: translateY(-3px); }
+
+        /* Auth Modals */
+        .auth-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 10005;
+            backdrop-filter: blur(5px);
+        }
+        .auth-box { 
+            background: #0d0202; padding: 2.5rem; border-radius: 20px; 
+            border: 2px solid var(--border-glow); width: 100%; max-width: 420px;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 🔴 MAIN ENVIRONMENT WORKSPACE */
+        .app-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: var(--bg-dark-red); }
+        
+        /* Student Sticky Mini Top SOS Header Option */
+        .top-mini-bar {
+            background: #140303; border-bottom: 2px solid #3d0b0b;
+            padding: 0.6rem 2rem; display: none; justify-content: space-between; align-items: center; z-index: 50;
+        }
+        .mini-sos-btn {
+            background: var(--danger); color: white; border: none; font-weight: bold;
+            padding: 0.4rem 1.2rem; border-radius: 6px; cursor: pointer;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: miniPulse 1.5s infinite;
+        }
+        @keyframes miniPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; background: #b91c1c; } }
+
+        .workspace-core { display: flex; flex: 1; height: calc(100vh - 45px); overflow: hidden; }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 290px; background-color: var(--sidebar-color); 
+            border-right: 2px solid #2d0707;
+            display: flex; flex-direction: column; padding: 1.5rem 1rem;
+            z-index: 10;
+        }
+        .sidebar-brand { 
+            font-size: 1.3rem; font-weight: 800; padding-bottom: 1.5rem; 
+            border-bottom: 1px solid #2d0707; margin-bottom: 1.5rem; text-align: center; 
+        }
+        .role-badge { display: inline-block; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 800; border-radius: 20px; margin-top: 6px; text-transform: uppercase; }
+        
+        .sidebar-menu { flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+        .menu-btn {
+            background: #140303; border: 1px solid #2d0707; color: var(--text-muted); padding: 0.9rem 1.2rem;
+            text-align: left; font-size: 0.95rem; font-weight: 600; cursor: pointer; border-radius: 10px;
+            display: flex; align-items: center; gap: 12px; transition: all 0.2s;
+        }
+        .menu-btn:hover, .menu-btn.active { background: #260707; color: white; border-color: var(--border-glow); }
+        .student-mode .menu-btn.active { border-left: 5px solid var(--primary-blue); box-shadow: 0 0 12px rgba(59, 130, 246, 0.2); }
+        .admin-mode .menu-btn.active { border-left: 5px solid var(--admin-pink); box-shadow: 0 0 12px rgba(236, 72, 153, 0.2); }
+        .logout-btn { background: #2d0707; color: white; margin-top: auto; border: none; font-weight: bold; }
+        .logout-btn:hover { background: #4c0c0c; }
+
+        /* Viewport Panels */
+        .viewport { 
+            flex: 1; padding: 2.5rem; overflow-y: auto; 
+            background: radial-gradient(circle at top right, #1a0404, #050000); 
+            position: relative;
+        }
+        
+        /* 🔥 ADMIN EXCLUSIVE FIRE & ABSTRACT BACKGROUND FUSION */
+        .admin-mode .viewport { background: linear-gradient(135deg, #0f0101 0%, #000000 100%); }
+        .admin-mode .viewport::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 60%);
+            pointer-events: none; z-index: 1;
+        }
+        #admin-fire-overlay {
+            display: none; position: absolute; top:0; left:0; width:100%; height:100%;
+            background-image: radial-gradient(rgba(239, 68, 68, 0.2) 1px, transparent 0), radial-gradient(rgba(236, 72, 153, 0.15) 2px, transparent 0);
+            background-size: 40px 40px; background-position: 0 0, 20px 20px;
+            pointer-events: none; z-index: 2; opacity: 0.6; animation: fireRise 8s linear infinite;
+        }
+        @keyframes fireRise {
+            0% { background-position: 0 0, 20px 20px; filter: hue-rotate(0deg); }
+            100% { background-position: 0 -200px, 20px -180px; filter: hue-rotate(10deg); }
+        }
+
+        .panel { display: none; max-width: 950px; margin: 0 auto; position: relative; z-index: 5; animation: slideUp 0.3s ease-out; }
+        .panel.active { display: block; }
+        @keyframes slideUp { from { opacity:0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } }
+
+        h2 { font-size: 2rem; color: #f8fafc; margin-bottom: 0.5rem; font-weight: 800; }
+        .section-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; }
+
+        /* Forms Elements */
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: bold; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.05em; }
+        input, select, textarea { width: 100%; padding: 0.85rem 1.2rem; background: #070101; border: 1px solid #3d0b0b; border-radius: 8px; color: white; font-size: 0.95rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--border-glow); box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+        
+        .action-btn { background: var(--border-glow); color: white; border: none; padding: 0.85rem 1.75rem; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .action-btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        /* Cards Layout */
+        .complain-card { background: var(--card-red-black); border: 1px solid #3d0b0b; border-radius: 14px; padding: 1.75rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .complain-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.85rem; }
+        
+        .judgement-badge { padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .badge-pending { background: #3c1502; color: var(--warning); border: 1px solid var(--warning); }
+        .badge-resolved { background: #043e2f; color: var(--success); border: 1px solid var(--success); }
+        .badge-rejected { background: #3a0808; color: var(--danger); border: 1px solid var(--danger); }
+        
+        /* Seating Elements */
+        .classroom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #050000; padding: 20px; border-radius: 12px; border: 1px solid #2d0707; }
+        .desk { background: #240707; padding: 15px 10px; text-align: center; border-radius: 8px; font-size: 0.9rem; font-weight: bold; border: 1px solid #3d0b0b; }
+        .desk.occupied { background: #0b0f19; border: 1px solid #3b82f6; color: #93c5fd; }
+        .teacher-podium { grid-column: span 3; background: #3d0b0b; text-align: center; padding: 10px; border-radius: 8px; font-size: 1rem; font-weight: bold; color: #fca5a5; }
+
+        /* Custom Alert Dialog */
+        #system-popup-alert {
+            position: fixed; bottom: 30px; right: 30px; background: #7f1d1d; color: white;
+            padding: 1.5rem 2rem; border-radius: 12px; border: 2px solid var(--danger);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.8); z-index: 20000; display: none;
+            animation: slideLeft 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideLeft { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    </style>
+</head>
+<body>
+
+    <!-- SYSTEM POPUP ALERT WINDOW -->
+    <div id="system-popup-alert"></div>
+
+    <!-- ================= 🟢 FIRST PANEL: REAL SKY BLUE ENVIRONMENT TERMINAL ================= -->
+    <div id="portal-gateway">
+        <!-- Generated Star Drops -->
+        <script>
+            for(let i=0; i<65; i++) {
+                let star = document.createElement('div');
+                star.className = 'sky-star';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2.5 + 's';
+                document.getElementById('portal-gateway').appendChild(star);
+            }
+        </script>
+        <div class="gateway-title">Hello Lazy</div>
+        <div class="gateway-sub">Computer Club BAIUST</div>
+        <div class="gateway-btn-group">
+            <button class="g-btn g-student" onclick="openAuthModal('student')">👨‍🎓 Student Hub Portal</button>
+            <button class="g-btn g-admin" onclick="openAuthModal('admin')">👑 Admin Command (Abir)</button>
+        </div>
+    </div>
+
+    <!-- STUDENT AUTH NODE MODAL (Log-In & Sign-Up Double Logic Engine) -->
+    <div class="auth-overlay" id="modal-student-auth">
+        <div class="auth-box">
+            <h3 id="student-modal-title" style="margin-bottom:1.5rem; color:var(--primary-blue)">🔐 Student Account Log In</h3>
+            <div class="form-group"><label>Student ID</label><input type="text" id="s-roll" placeholder="Enter Student ID"></div>
+            <div class="form-group"><label>Portal Key Password</label><input type="password" id="s-pass" placeholder="••••••••"></div>
+            
+            <div id="student-signin-actions">
+                <button class="action-btn" style="width:100%; background:var(--primary-blue)" onclick="loginStudent()">Log In Node</button>
+                <p style="text-align:center; font-size:0.85rem; margin-top:0.8rem; color:var(--text-muted)">
+                    New user account? <a href="#" style="color:#60a5fa" onclick="toggleStudentAuthMode('signup')">Create Account / Sign Up</a>
+                </p>
+            </div>
+            <div id="student-signup-actions" style="display:none;">
+                <button class="action-btn" style="width:100%; background:var(--success)" onclick="registerStudentAccount()">Create & Register Node</button>
+                <p style="text-align:center; font-size:0.85rem; margin-top:0.8rem; color:var(--text-muted)">
+                    Already have a credential? <a href="#" style="color:#60a5fa" onclick="toggleStudentAuthMode('signin')">Go to Log In</a>
+                </p>
+            </div>
+            <button class="action-btn" style="width:100%; background:none; color:var(--text-muted); margin-top:0.5rem;" onclick="closeAuthModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ADMIN AUTH MODAL -->
+    <div class="auth-overlay" id="modal-admin-auth">
+        <div class="auth-box">
+            <h3 style="margin-bottom:1.5rem; color:var(--admin-pink)">👑 Abir Master Access Verification</h3>
+            <div class="form-group"><label>Security Username</label><input type="text" id="a-id" placeholder="abir" value="abir"></div>
+            <div class="form-group"><label>Security Secret Key</label><input type="password" id="a-pass" placeholder="••••••••"></div>
+            <button class="action-btn" style="width:100%; background:var(--admin-pink)" onclick="loginAdmin()">Override Verification</button>
+            <button class="action-btn" style="width:100%; background:none; color:var(--text-muted); margin-top:0.5rem;" onclick="closeAuthModal()">Cancel</button>
+        </div>
+    </div>
+
+
+    <!-- ================= 🔴 MAIN APP CONTAINER CORE FRAMEWORK ================= -->
+    <div class="app-container">
+        
+        <!-- TOP STICKY MINI SOS OPTION HEADER PANEL FOR QUICK ACCESS -->
+        <div class="top-mini-bar" id="student-top-sos-bar">
+            <span style="font-size:0.9rem; font-weight:bold; color:#93c5fd;">⚡ Quick Link Node Terminal Running Mode</span>
+            <button class="mini-sos-btn" onclick="triggerMiniSOSAlert()">🚨 QUICK SOS DISPATCH</button>
+        </div>
+
+        <div class="workspace-core">
+            <!-- SIDEBAR CONTAINER -->
+            <div class="sidebar" id="app-sidebar">
+                <div class="sidebar-brand">
+                    <div id="brand-text">STUDENT TERMINAL</div>
+                    <div id="sidebar-badge" class="role-badge" style="background:var(--primary-blue)">Client Node</div>
+                </div>
+
+                <div class="sidebar-menu">
+                    <button class="menu-btn active" id="btn-nav-m1" onclick="switchPanel('panel-m1')">📢 Complains & Actions Feed</button>
+                    <button class="menu-btn" id="btn-nav-m2" onclick="switchPanel('panel-m2')">🪑 Seating Matrix Bench</button>
+                    <button class="menu-btn" id="btn-nav-m3" onclick="switchPanel('panel-m3')">📚 Syllabus & Directives</button>
+                    <button class="menu-btn" id="btn-nav-m4" onclick="switchPanel('panel-m4')">📊 Financial Ledger Graph</button>
+                    <button class="menu-btn" id="btn-nav-m5" onclick="switchPanel('panel-m5')">🚨 Emergency SOS Module</button>
+                    <button class="menu-btn" id="btn-nav-m6" onclick="switchPanel('panel-m6')">🔍 Rules Reference Index</button>
+                    
+                    <button class="menu-btn logout-btn" onclick="systemSignout()">🚪 Exit & Sign Out</button>
+                </div>
+            </div>
+
+            <!-- VIEWPORT MATRIX TARGET BLOCKS -->
+            <div class="viewport">
+                <!-- Admin Fire Animation Layer -->
+                <div id="admin-fire-overlay"></div>
+
+                <!-- PANEL 1: LIVE COMPLAIN REPOSITORY -->
+                <div class="panel active" id="panel-m1">
+                    <h2>📢 Central Grievance & Complain Repository</h2>
+                    <div class="section-sub">Students report discrepancies. Public vote agreement engine active. Final judgment reserved for Abir.</div>
+                    
+                    <!-- Admin Master Controller Box -->
+                    <div id="admin-push-controller" style="display:none; background: #200404; border: 2px dashed var(--admin-pink); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h3 style="color: var(--admin-pink); margin-bottom: 1rem;">👑 Abir's Master Broadcast & Sync Terminal</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                            <div>
+                                <label>Push Official Syllabus Update</label>
+                                <input type="text" id="adm-syllabus-title" placeholder="Syllabus Term Name" style="margin-bottom:0.5rem;">
+                                <textarea id="adm-syllabus-body" rows="2" placeholder="Write full text details here..." style="margin-bottom:0.5rem;"></textarea>
+                                <button class="action-btn" style="background:var(--admin-pink)" onclick="publishAdminSyllabus()">Broadcast Syllabus</button>
+                            </div>
+                            <div>
+                                <label>Ledger Forgery Injection Override</label>
+                                <input type="number" id="adm-ledger-inject" placeholder="Enter custom total BDT value" style="margin-bottom:0.5rem;">
+                                <button class="action-btn" style="background:var(--admin-pink)" onclick="injectLedgerCapital()">Override Ledger Graph</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Form Entry Box -->
+                    <div id="student-write-complain" class="complain-card" style="background: #0d0101;">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-blue);">File New Anonymous Systemic Complaint Form</h4>
+                        <div class="form-group">
+                            <label>Extortion / Issue Category</label>
+                            <select id="comp-category">
+                                <option value="Canteen Monopoly">Canteen Extortion</option>
+                                <option value="Captain Tyranny">Captain Power Abuse</option>
+                                <option value="Bathroom Maintenance">Bathroom Malpractice</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Detailed Grievance Log Data</label>
+                            <textarea id="comp-desc" rows="3" placeholder="Provide accurate event timeline descriptions..."></textarea>
+                        </div>
+                        <button class="action-btn" style="background:var(--primary-blue)" onclick="createNewComplain()">Launch Complain Pipeline</button>
+                    </div>
+
+                    <h3 style="margin-bottom:1rem; margin-top: 2rem;">📋 Realtime Live Grievance Timeline Database</h3>
+                    <div id="live-complains-injection-zone"></div>
+                </div>
+
+                <!-- PANEL 2: SEATING ARRANGEMENT MATRIX -->
+                <div class="panel" id="panel-m2">
+                    <h2>🪑 Seating Allocation Height Sortation Grid</h2>
+                    <div class="section-sub">Dismantles arbitrary shield arrangement tactics. Sorts configuration directly by height ascending parameters.</div>
+                    <div class="complain-card">
+                        <h4 style="margin-bottom:1rem;">Append Student Node to Matrix Records</h4>
+                        <div style="display: flex; gap: 15px;">
+                            <input type="text" id="m2-name" placeholder="Full Student Name">
+                            <input type="number" id="m2-height" placeholder="Height in cm">
+                            <button class="action-btn" style="background: var(--border-glow);" onclick="addStudentRecord()">Insert Node Data</button>
+                        </div>
+                    </div>
+                    <div class="classroom-grid" id="seating-grid"><div class="teacher-podium">Front Desk Teacher's Podium</div></div>
+                </div>
+
+                <!-- PANEL 3: CURRICULUM DIRECTIVES -->
+                <div class="panel" id="panel-m3">
+                    <h2>📚 Administrative Curriculum Directive Matrix</h2>
+                    <div class="section-sub">Displays the official updated syllabuses posted explicitly from Abir's admin account.</div>
+                    <div id="syllabus-broadcast-target-zone"></div>
+                </div>
+
+                <!-- PANEL 4: MONITORED FINANCIAL LEDGER GRAPH -->
+                <div class="panel" id="panel-m4">
+                    <h2>📊 Dynamic Monitored Extortion Capital Ledger</h2>
+                    <div class="section-sub">Audits microtransaction graphs accumulated inside arbitrary illegal institutional fine structures.</div>
+                    <div style="background:var(--card-red-black); padding:1.5rem; border-radius:12px; border:1px solid #3d0b0b; height: 380px;">
+                        <canvas id="economyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- PANEL 5: DUAL EMERGENCY DISTRESS TERMINAL -->
+                <div class="panel" id="panel-m5">
+                    <h2>🚨 Secure Location Emergency System Node</h2>
+                    <div class="section-sub">Dispatches automated validation metrics down infrastructure lines.</div>
+                    <div class="sos-wrapper">
+                        <div class="form-group" style="max-width:400px; margin:0 auto 1.5rem;">
+                            <label>Select Current Coordinate/Location</label>
+                            <select id="sos-location-input">
+                                <option value="North Playground Perimeter">North Playground Perimeter</option>
+                                <option value="Main Library Corridor Block B">Main Library Corridor Block B</option>
+                                <option value="Canteen Dining Backyard">Canteen Dining Backyard</option>
+                            </select>
+                        </div>
+                        <button class="sos-master-btn" onclick="executeEmergencySOSStage1()">🚨 INITIALIZE SOS DISTRESS FLARE 🚨</button>
+                        <div style="margin-top: 2.5rem; text-align: left;">
+                            <label>Network Transmission Terminal Log Reports:</label>
+                            <div id="sos-intercept-feed-box" style="margin-top:0.5rem; max-height:180px; overflow-y:auto; background:#070101; padding:10px; border-radius:8px; border:1px solid #3d0b0b;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 6: DYNAMIC RULES REFERENCES INDEX -->
+                <div class="panel" id="panel-m6">
+                    <h2>🔍 Pre-seeded Institutional Policy Verification Matrix</h2>
+                    <div class="section-sub">Perform instant reference checks against the current running legal charter guidelines database.</div>
+                    
+                    <!-- Admin Dynamic Rules Injector Interface -->
+                    <div id="admin-rules-crud-box" style="display:none; background:#1c0505; border:1px solid var(--admin-pink); padding:1.5rem; border-radius:12px; margin-bottom:1.5rem;">
+                        <h4 style="color:var(--admin-pink); margin-bottom:1rem;">👑 Administrative Rules Contract Management Matrix</h4>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="new-rule-input-text" placeholder="Type new rule text contract statement details here...">
+                            <button class="action-btn" style="background:var(--admin-pink);" onclick="addNewDynamicRule()">Add New Rule</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Query Rule Parameter Tokens Lookup</label>
+                        <input type="text" id="m6-search-query" placeholder="Type key phrases: tiffin, fine, captain..." onkeyup="executeRuleChecker()">
+                    </div>
+                    
+                    <div id="m6-search-output-block" style="font-weight: bold; font-size:1.1rem; padding: 1.25rem; border-radius:8px; margin-bottom:1.5rem; line-height: 1.5;"></div>
+                    
+                    <h4 style="margin-bottom:1rem; color:#f8fafc;">📋 Full Database Rules Document Matrix:</h4>
+                    <div id="m6-full-rules-list-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BACKEND JAVASCRIPT MASTER OPERATIONS SYSTEM ================= -->
+    <script>
+        let currentRoleMode = 'student'; 
+        let activeUserEntity = 'Anonymous Student';
+        let chartEngineObject = null;
+        let currentAuthMode = 'signin'; 
+
+        // Simulated Student Auth User Accounts Database
+        if(!localStorage.getItem('sys_user_db')) {
+            localStorage.setItem('sys_user_db', JSON.stringify({"101": "pass123"})); 
+        }
+
+        // Rules Database Initialize Engine
+        if(!localStorage.getItem('sys_rules_db')) {
+            localStorage.setItem('sys_rules_db', JSON.stringify([
+                "Institutional framework policy mandates absolutely no fine collection powers to class captains without written authorization.",
+                "All cafeteria pricing standards must mirror national local retail pricing frameworks precisely.",
+                "Bathroom sanitation breaks are designated completely free of charge to any registered candidate."
+            ]));
+        }
+
+        // Init General Records
+        if(!localStorage.getItem('sys_complains')) {
+            localStorage.setItem('sys_complains', JSON.stringify([
+                { id: 201, category: "Captain Tyranny", desc: "The class captain collected extra fee for arbitrary parameters without authorization.", author: "ID: 101", agree: 14, disagree: 1, status: "PENDING", response: "" }
+            ]));
+        }
+        if(!localStorage.getItem('sys_students')) {
+            localStorage.setItem('sys_students', JSON.stringify([{name: "Kuddus (Captain)", height: 182}, {name: "Biltu (Student)", height: 165}]));
+        }
+        if(!localStorage.getItem('sys_vault')) localStorage.setItem('sys_vault', '1500');
+        if(!localStorage.getItem('sys_syllabus')) {
+            localStorage.setItem('sys_syllabus', JSON.stringify([{ title: "Term 1 Blueprint 2026", body: "Syllabus updated by Admin Abir. Extraneous components stripped out." }]));
+        }
+
+        // Auth Processing UI Toggles
+        function toggleStudentAuthMode(mode) {
+            currentAuthMode = mode;
+            const title = document.getElementById('student-modal-title');
+            const signinBox = document.getElementById('student-signin-actions');
+            const signupBox = document.getElementById('student-signup-actions');
+
+            if(mode === 'signup') {
+                title.innerText = "📝 Register New Student Node (Sign Up)";
+                signinBox.style.display = "none"; signupBox.style.display = "block";
+            } else {
+                title.innerText = "🔐 Student Account Log In";
+                signinBox.style.display = "block"; signupBox.style.display = "none";
+            }
+        }
+
+        function openAuthModal(role) {
+            if(role === 'student') { toggleStudentAuthMode('signin'); document.getElementById('modal-student-auth').style.display = 'flex'; }
+            if(role === 'admin') document.getElementById('modal-admin-auth').style.display = 'flex';
+        }
+        function closeAuthModal() {
+            document.getElementById('modal-student-auth').style.display = 'none';
+            document.getElementById('modal-admin-auth').style.display = 'none';
+        }
+
+        // Student Account Dynamic Registration (Sign Up) Logic
+        function registerStudentAccount() {
+            const id = document.getElementById('s-roll').value.trim();
+            const pass = document.getElementById('s-pass').value.trim();
+            if(!id || !pass) { alert("Please provide both Student ID and Password parameters."); return; }
+
+            let userDb = JSON.parse(localStorage.getItem('sys_user_db'));
+            if(userDb[id]) { alert("This Student ID is already registered inside database matrix!"); return; }
+
+            userDb[id] = pass;
+            localStorage.setItem('sys_user_db', JSON.stringify(userDb));
+            alert("Registration successful! Proceeding into system Log In process.");
+            toggleStudentAuthMode('signin');
+        }
+
+        // Student Node Entrance (Log In Verification)
+        function loginStudent() {
+            const id = document.getElementById('s-roll').value.trim();
+            const pass = document.getElementById('s-pass').value.trim();
+            let userDb = JSON.parse(localStorage.getItem('sys_user_db'));
+
+            if(userDb[id] && userDb[id] === pass) {
+                activeUserEntity = `ID: ${id}`;
+                currentRoleMode = 'student';
+                setupEnvironmentUI();
+            } else {
+                alert("Invalid Identity Combination! Check Student ID or Password keys.");
+            }
+        }
+
+        // Admin Access Authentication
+        function loginAdmin() {
+            const id = document.getElementById('a-id').value.trim().toLowerCase();
+            const pass = document.getElementById('a-pass').value.trim();
+            
+            if(id === 'abir' && pass === 'abir123') {
+                activeUserEntity = "Abir (Master Admin)";
+                currentRoleMode = 'admin';
+                setupEnvironmentUI();
+            } else {
+                alert("Incorrect Admin Credentials!");
+            }
+        }
+
+        function setupEnvironmentUI() {
+            closeAuthModal();
+            document.getElementById('portal-gateway').style.opacity = '0';
+            setTimeout(() => { document.getElementById('portal-gateway').style.display = 'none'; }, 400);
+
+            const bodyTag = document.body;
+            const brand = document.getElementById('brand-text');
+            const badge = document.getElementById('sidebar-badge');
+            const adminPanelBox = document.getElementById('admin-push-controller');
+            const studentWriteBox = document.getElementById('student-write-complain');
+            const fireOverlay = document.getElementById('admin-fire-overlay');
+            const miniSosBar = document.getElementById('student-top-sos-bar');
+            const adminRulesBox = document.getElementById('admin-rules-crud-box');
+
+            if(currentRoleMode === 'admin') {
+                bodyTag.className = "admin-mode";
+                brand.innerText = "ABIR ROOT SYSTEM";
+                badge.innerText = "Super User Core";
+                badge.style.background = "var(--admin-pink)";
+                adminPanelBox.style.display = "block";
+                studentWriteBox.style.display = "none";
+                fireOverlay.style.display = "block";
+                miniSosBar.style.display = "none";
+                adminRulesBox.style.display = "block"; 
+            } else {
+                bodyTag.className = "student-mode";
+                brand.innerText = "STUDENT TERMINAL";
+                badge.innerText = `Node: ${activeUserEntity}`;
+                badge.style.background = "var(--primary-blue)";
+                adminPanelBox.style.display = "none";
+                studentWriteBox.style.display = "block";
+                fireOverlay.style.display = "none";
+                miniSosBar.style.display = "flex";  
+                adminRulesBox.style.display = "none";
+            }
+            renderComplainTimeline();
+            renderSyllabusTimeline();
+            renderFullRulesListGrid();
+            switchPanel('panel-m1');
+        }
+
+        function systemSignout() {
+            document.getElementById('portal-gateway').style.display = 'flex';
+            setTimeout(() => { document.getElementById('portal-gateway').style.opacity = '1'; }, 50);
+            document.getElementById('s-roll').value = '';
+            document.getElementById('s-pass').value = '';
+            document.getElementById('a-pass').value = '';
+            document.getElementById('student-top-sos-bar').style.display = 'none';
+            if(chartEngineObject) { chartEngineObject.destroy(); chartEngineObject = null; }
+        }
+
+        function switchPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            
+            const activeNavBtnMap = {
+                'panel-m1': 'btn-nav-m1', 'panel-m2': 'btn-nav-m2',
+                'panel-m3': 'btn-nav-m3', 'panel-m4': 'btn-nav-m4',
+                'panel-m5': 'btn-nav-m5', 'panel-m6': 'btn-nav-m6'
+            };
+            document.getElementById(activeNavBtnMap[panelId]).classList.add('active');
+            
+            if(panelId === 'panel-m4') { setTimeout(initializeLedgerGraph, 80); }
+            if(panelId === 'panel-m2') { renderSeatingMatrixLayout(); }
+            if(panelId === 'panel-m6') { renderFullRulesListGrid(); }
+        }
+
+        // Rules Management dynamic logic
+        function renderFullRulesListGrid() {
+            const container = document.getElementById('m6-full-rules-list-container');
+            const rules = JSON.parse(localStorage.getItem('sys_rules_db')) || [];
+            container.innerHTML = '';
+
+            rules.forEach((rule, idx) => {
+                let div = document.createElement('div');
+                div.style.background = "#140404";
+                div.style.border = "1px solid #3d0b0b";
+                div.style.padding = "1rem";
+                div.style.borderRadius = "8px";
+                div.style.display = "flex";
+                div.style.justify = "space-between";
+                div.style.alignItems = "center";
+
+                let removeBtn = '';
+                if(currentRoleMode === 'admin') {
+                    removeBtn = `<button class="action-btn" style="background:var(--danger); padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="removeDynamicRule(${idx})">🗑️ Remove</button>`;
+                }
+
+                div.innerHTML = `<span style="font-size:0.95rem; color:#f8fafc; line-height:1.4;">📄 <strong>[Rule #${idx+1}]:</strong> ${rule}</span> ${removeBtn}`;
+                container.appendChild(div);
+            });
+        }
+
+        function addNewDynamicRule() {
+            const txt = document.getElementById('new-rule-input-text').value.trim();
+            if(!txt) { alert("Rule content cannot be empty!"); return; }
+
+            let rules = JSON.parse(localStorage.getItem('sys_rules_db'));
+            rules.push(txt);
+            localStorage.setItem('sys_rules_db', JSON.stringify(rules));
+            document.getElementById('new-rule-input-text').value = '';
+            renderFullRulesListGrid();
+            displaySystemNotification("SYSTEM NOTICE: New Policy Clause Appended.");
+        }
+
+        function removeDynamicRule(index) {
+            let rules = JSON.parse(localStorage.getItem('sys_rules_db'));
+            rules.splice(index, 1);
+            localStorage.setItem('sys_rules_db', JSON.stringify(rules));
+            renderFullRulesListGrid();
+            displaySystemNotification("SYSTEM WARN: Policy Clause Stripped Out.");
+        }
+
+        function executeRuleChecker() {
+            const query = document.getElementById('m6-search-query').value.toLowerCase().trim();
+            const out = document.getElementById('m6-search-output-block');
+            if(!query) { out.innerText = ''; out.style.background = 'none'; out.style.border='none'; return; }
+
+            let rules = JSON.parse(localStorage.getItem('sys_rules_db')) || [];
+            let match = rules.find(line => line.toLowerCase().includes(query));
+
+            if(match) {
+                out.style.background = '#3a0808'; out.style.color = '#fca5a5'; out.style.border = '1px solid var(--danger)';
+                out.innerText = `🛑 MATCH FOUND IN CHARTER CONTRACTS: "${match}"`;
+            } else {
+                out.style.background = '#043e2f'; out.style.color = '#a7f3d0'; out.style.border = '1px solid var(--success)';
+                out.innerText = `🔍 COMPLIANT STATUS: No restriction matching terms verified.`;
+            }
+        }
+
+        // Notification Engine
+        function displaySystemNotification(msg) {
+            const popup = document.getElementById('system-popup-alert');
+            popup.innerHTML = `<strong>📡 CRITICAL BROADCAST ALERT:</strong><br>${msg}`;
+            popup.style.display = 'block';
+            console.warn(`[SOS INTERCEPT DISPATCH]: ${msg}`);
+            
+            setTimeout(() => { popup.style.opacity = '0'; setTimeout(() => { popup.style.display='none'; popup.style.opacity='1'; }, 300); }, 5000);
+        }
+
+        function triggerMiniSOSAlert() {
+            const msg = `Mini Quick SOS triggered directly from status bar endpoint by user client: ${activeUserEntity}`;
+            displaySystemNotification(msg);
+            
+            const logContainer = document.getElementById('sos-intercept-feed-box');
+            if(logContainer) {
+                let item = document.createElement('div');
+                item.className = "sos-log-item";
+                item.innerHTML = `🚨 <strong>[TOP STRIP SOS TRIGGERED]</strong> Fired at coordinate timeline channel index. Network notified.`;
+                logContainer.prepend(item);
+            }
+        }
+
+        function executeEmergencySOSStage1() {
+            const loc = document.getElementById('sos-location-input').value;
+            const msg = `CRITICAL ALERT DEPLOYED: Node user ${activeUserEntity} reports active target event situation anomalies at coordinates location [${loc}].`;
+            
+            displaySystemNotification(msg);
+
+            const logContainer = document.getElementById('sos-intercept-feed-box');
+            let item = document.createElement('div');
+            item.className = "sos-log-item";
+            item.innerHTML = `🚨 <strong>[CENTRAL RADAR LOGGED]</strong> Emergency dispatch vectors synchronized safely for area: ${loc}.`;
+            logContainer.prepend(item);
+        }
+
+        // General functions
+        function renderComplainTimeline() {
+            const container = document.getElementById('live-complains-injection-zone');
+            const dataset = JSON.parse(localStorage.getItem('sys_complains'));
+            container.innerHTML = '';
+
+            dataset.forEach(item => {
+                let card = document.createElement('div');
+                card.className = "complain-card";
+                
+                let judgementBlock = '';
+                if(currentRoleMode === 'admin' && item.status === 'PENDING') {
+                    judgementBlock = `
+                        <div style="margin-top:1.25rem; padding-top:1.25rem; border-top:1px dashed #5c1414; display:flex; gap:10px;">
+                            <input type="text" id="judg-text-${item.id}" placeholder="Type administrative decision response...">
+                            <button class="action-btn" style="background:var(--success); font-size:0.85rem;" onclick="executeAdminVerdict(${item.id}, 'RESOLVED')">Approve</button>
+                            <button class="action-btn" style="background:var(--danger); font-size:0.85rem;" onclick="executeAdminVerdict(${item.id}, 'REJECTED')">Reject</button>
+                        </div>
+                    `;
+                } else if(item.response) {
+                    judgementBlock = `<div style="margin-top:1rem; padding:1rem; background:rgba(16,185,129,0.08); border-left:4px solid var(--success); font-size:0.95rem; color:#a7f3d0;">
+                        <strong>⚖️ Verdict Log:</strong> ${item.response}
+                    </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="complain-header">
+                        <div><span style="font-weight:bold; color:#ef4444; font-size:1.1rem;">[${item.category}]</span><div style="font-size:0.85rem; color:var(--text-muted)">User: ${item.author}</div></div>
+                        <span class="judgement-badge badge-${item.status.toLowerCase()}">${item.status}</span>
+                    </div>
+                    <p style="font-size:1rem; line-height:1.5; margin:0.5rem 0;">"${item.desc}"</p>
+                    <div class="react-bar">
+                        <button class="react-btn" onclick="registerStudentReaction(${item.id}, 'agree')">👍 Agree (${item.agree})</button>
+                        <button class="react-btn" onclick="registerStudentReaction(${item.id}, 'disagree')">👎 Disagree (${item.disagree})</button>
+                    </div>
+                    ${judgementBlock}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function createNewComplain() {
+            const cat = document.getElementById('comp-category').value;
+            const desc = document.getElementById('comp-desc').value.trim();
+            if(!desc) { alert("Description missing."); return; }
+
+            let records = JSON.parse(localStorage.getItem('sys_complains'));
+            records.unshift({ id: Date.now(), category: cat, desc: desc, author: activeUserEntity, agree: 0, disagree: 0, status: "PENDING", response: "" });
+            localStorage.setItem('sys_complains', JSON.stringify(records));
+            document.getElementById('comp-desc').value = '';
+            renderComplainTimeline();
+        }
+
+        function registerStudentReaction(id, type) {
+            let records = JSON.parse(localStorage.getItem('sys_complains'));
+            let target = records.find(r => r.id === id);
+            if(!target) return;
+            if(type === 'agree') target.agree += 1;
+            if(type === 'disagree') target.disagree += 1;
+            localStorage.setItem('sys_complains', JSON.stringify(records));
+            renderComplainTimeline();
+        }
+
+        function executeAdminVerdict(id, newStatus) {
+            const note = document.getElementById(`judg-text-${id}`).value.trim();
+            if(!note) { alert("Please input formal decision parameters."); return; }
+
+            let records = JSON.parse(localStorage.getItem('sys_complains'));
+            let target = records.find(r => r.id === id);
+            if(target) { target.status = newStatus; target.response = note; }
+            localStorage.setItem('sys_complains', JSON.stringify(records));
+            renderComplainTimeline();
+        }
+
+        function renderSeatingMatrixLayout() {
+            const container = document.getElementById('seating-grid');
+            container.innerHTML = '<div class="teacher-podium">Front Desk Teacher\'s Podium</div>';
+            let list = JSON.parse(localStorage.getItem('sys_students'));
+            list.sort((a,b) => a.height - b.height);
+            list.forEach(st => {
+                let deskNode = document.createElement('div');
+                deskNode.className = "desk occupied";
+                deskNode.innerText = `${st.name}\n(${st.height} cm)`;
+                container.appendChild(deskNode);
+            });
+        }
+
+        function addStudentRecord() {
+            let nm = document.getElementById('m2-name').value.trim();
+            let ht = parseInt(document.getElementById('m2-height').value);
+            if(!nm || !ht) { alert("Fill all setups."); return; }
+            let list = JSON.parse(localStorage.getItem('sys_students'));
+            list.push({name: nm, height: ht});
+            localStorage.setItem('sys_students', JSON.stringify(list));
+            renderSeatingMatrixLayout();
+            document.getElementById('m2-name').value = '';
+            document.getElementById('m2-height').value = '';
+        }
+
+        function renderSyllabusTimeline() {
+            const targetZone = document.getElementById('syllabus-broadcast-target-zone');
+            const data = JSON.parse(localStorage.getItem('sys_syllabus'));
+            targetZone.innerHTML = '';
+            data.forEach(s => {
+                let div = document.createElement('div');
+                div.className = "complain-card";
+                div.style.borderLeft = "4px solid var(--primary-blue)";
+                div.innerHTML = `<h4 style="color:#60a5fa;">📌 ${s.title}</h4><p style="margin-top:0.5rem; font-size:0.95rem; line-height:1.5;">${s.body}</p>`;
+                targetZone.appendChild(div);
+            });
+        }
+
+        function publishAdminSyllabus() {
+            const title = document.getElementById('adm-syllabus-title').value.trim();
+            const body = document.getElementById('adm-syllabus-body').value.trim();
+            if(!title || !body) { alert("Fields cannot be empty."); return; }
+            let arr = JSON.parse(localStorage.getItem('sys_syllabus'));
+            arr.unshift({ title: title, body: body });
+            localStorage.setItem('sys_syllabus', JSON.stringify(arr));
+            document.getElementById('adm-syllabus-title').value = '';
+            document.getElementById('adm-syllabus-body').value = '';
+            renderSyllabusTimeline();
+        }
+
+        function initializeLedgerGraph() {
+            const canvas = document.getElementById('economyChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(chartEngineObject) { chartEngineObject.destroy(); }
+
+            let vaultValue = parseInt(localStorage.getItem('sys_vault')) || 0;
+
+            chartEngineObject = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Monitored Vault Assets'],
+                    datasets: [{
+                        label: 'Fine Asset Accumulations BDT Index',
+                        data: [vaultValue],
+                        backgroundColor: 'rgba(239, 68, 68, 0.85)', borderColor: '#ef4444', borderWidth: 2, borderRadius: 6
+                    }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#3d0b0b' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: { legend: { labels: { color: '#f8fafc' } } }
+                }
+            });
+        }
+
+        function injectLedgerCapital() {
+            const val = document.getElementById('adm-ledger-inject').value.trim();
+            if(!val) return;
+            localStorage.setItem('sys_vault', val);
+            document.getElementById('adm-ledger-inject').value = '';
+            initializeLedgerGraph();
+            alert("Capital parameters overwritten securely.");
+        }
+    </script>
+</body>
+</html>
